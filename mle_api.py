@@ -11,3 +11,4 @@ def get_prediction_for_item(user_id: str, model_params: dict):
     all_params = {"user_id": user_id,
                    "model_params": model_params}
     return app.handler.handle(all_params)
+
