@@ -14,31 +14,20 @@ index = faiss.read_index('mle_index.index')
 def tokenize(text):
     text = ''.join([ch for ch in text if ch not in string.punctuation])
     tokens = nltk.word_tokenize(text)
-    lemmatizer = nltk.WordNetLemmatizer()
-    return [lemmatizer.lemmatize(token) for token in tokens]
-
-
-analyzer = CountVectorizer().build_analyzer()
-stemmer = nltk.stem.PorterStemmer()
-
-
-def stemmed_words(doc):
-    return (stemmer.stem(w) for w in analyzer(doc))
+    stem = nltk.stem.PorterStemmer()
+    stem_tokens = [stem.stem(token) for token in tokens]
+    return stem_tokens
 
 
 def preproc(text):
-    vectorizer = CountVectorizer(analyzer = stemmed_words,
-                                lowercase = True,
-                                tokenizer = tokenize,
-                                preprocessor = None,
-                                stop_words = 'english',
-                                ngram_range=(1, 3),
-                                max_features = 3500)
-    bow_cv = vectorizer.fit(all_texts)
+    vectorizer = CountVectorizer(tokenizer=tokenize,
+                                 stop_words='english',
+                                 max_features=3500)
+    vectorizer.fit(all_texts)
     bow_cv = vectorizer.transform([text])
-    tfidf = TfidfTransformer().fit_transform(bow_cv)
-    tfidf = tfidf.toarray()
-    return tfidf
+    bow_cv = TfidfTransformer().fit_transform(bow_cv)
+    bow_cv = bow_cv.toarray()
+    return bow_cv
 
 
 def inference(row, row_count):

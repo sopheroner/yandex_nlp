@@ -30,26 +30,18 @@ class FastApiHandler:
         def tokenize(text):
             text = ''.join([ch for ch in text if ch not in string.punctuation])
             tokens = nltk.word_tokenize(text)
-            lemmatizer = nltk.WordNetLemmatizer()
-            return [lemmatizer.lemmatize(token) for token in tokens]
-        analyzer = CountVectorizer().build_analyzer()
-        stemmer = nltk.stem.PorterStemmer()
+            stem = nltk.stem.PorterStemmer()
+            stem_tokens = [stem.stem(token) for token in tokens]
+            return stem_tokens
 
-        def stemmed_words(doc):
-            return (stemmer.stem(w) for w in analyzer(doc))
-
-        vectorizer = CountVectorizer(analyzer=stemmed_words,
-                                    lowercase=True,
-                                    tokenizer=tokenize,
-                                    preprocessor=None,
-                                    stop_words='english',
-                                    ngram_range=(1, 3),
-                                    max_features=3500)
+        vectorizer = CountVectorizer(tokenizer=tokenize,
+                                     stop_words='english',
+                                     max_features=3500)
         vectorizer.fit(all_texts)
         bow_cv = vectorizer.transform([row])
-        tfidf = TfidfTransformer().fit_transform(bow_cv)
-        tfidf = tfidf.toarray()
-        return tfidf
+        bow_cv = TfidfTransformer().fit_transform(bow_cv)
+        bow_cv = bow_cv.toarray()
+        return bow_cv
     
     def predict_rows(self, index_params):
         result = []
@@ -64,8 +56,10 @@ class FastApiHandler:
     
     def handle(self, params):
         try:
+            user_id = params['user_id']
             results = self.predict_rows(params['model_params'])
             response = {
+                "user_id": user_id,
                 "results": results
             }
         except Exception as e:
