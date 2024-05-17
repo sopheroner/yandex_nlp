@@ -13,8 +13,3 @@ click = st.button("Result")
 if click:
     for el in inference_results:
         st.write(el)
-
-# st.selectbox("Select box", options=["first", 'second'])
-# st.radio("Radio", options=["one", 'two'])
-
-
